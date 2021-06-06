@@ -1,0 +1,40 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library("tidyverse")
+library("caret")
+library("dplyr")
+
+dados <- read_delim("data/miellefinal_refatorado.csv", 
+     ",", escape_double = FALSE, trim_ws = TRUE)
+
+```
+
+```{r}
+length(dados$classifica)
+
+
+ctrl <- trainControl(method = "cv", number = 5, search = "random")
+set.seed(2)
+
+formula = as.formula(classifica~.)
+
+modelo.rl <- train(formula,
+                   data = dados,
+                   method = "glm",
+                   na.action = na.pass,
+                   family = "binomial",
+                   trControl = ctrl)
+
+#Acuracia
+modelo.rl$results$Accuracy
+
+
+```

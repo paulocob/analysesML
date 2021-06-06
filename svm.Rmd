@@ -1,0 +1,46 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library("tidyverse")
+library("caret")
+library("dplyr")
+library("e1071")
+
+
+dados <- read_delim("data/miellefinal_refatorado.csv", 
+     ",", escape_double = FALSE, trim_ws = TRUE)
+
+
+```
+
+
+```{r}
+# Separando dados levantados das classificações
+dd_brutos <- subset(dados, select = -resultado)
+resultados <- dados$resultado
+modelo_svm <- svm(resultado ~ ., data = dados)
+
+
+# Resumo do modelo
+summary(modelo_svm)
+```
+
+```{r}
+teste001 <- predict(modelo_svm, dd_brutos)
+table(teste001, resultados)
+```
+
+
+```{r}
+#Acuracia
+modelo_svm_melhorado <- svm(resultado ~ ., data = dados, kernel="radial", cost=1, gamma=0.5)
+teste002 <- predict(modelo_svm_melhorado, dd_brutos)
+table(teste002, resultados)
+```
+
+
+

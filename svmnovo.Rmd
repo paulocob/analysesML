@@ -1,0 +1,88 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library("tidyverse")
+library("caret")
+library("dplyr")
+library("e1071")
+
+
+dados <- read_delim("data/svm_refactor.csv", 
+     ",", escape_double = FALSE, trim_ws = TRUE)
+
+
+```
+```{r}
+getModelInfo()
+```
+
+
+```{r}
+treino_idx <- createDataPartition(y=dados$classifica, p=.7, list=FALSE)
+treino <- dados[treino_idx,]
+teste <- dados[-treino_idx,]
+names(treino) <- names(dados)
+names(teste) <- names(dados)
+```
+
+
+```{r}
+treinaEAvalia <- function(metodo) {
+  set.seed(23)
+  modelo <- train(classifica~., data=treino, method=metodo, trControl=trainControl(method="cv", number=10), prox=TRUE, allowParallel=TRUE)
+  #print(modelo$finalModel)
+  predicoes <- predict(modelo, newdata=teste)
+  print(confusionMatrix(table(data=predicoes, teste$classifica)))
+  precisao <- posPredValue(predicoes, teste$classifica)
+  recuperacao <- sensitivity(predicoes, teste$classifica)
+  f1 <- (2 * precisao * recuperacao) / (precisao + recuperacao)
+  print(precisao)
+  print(recuperacao)
+  print(f1)
+  return(f1)
+}
+```
+
+```{r}
+set.seed(23)
+```
+
+
+```{r}
+resultados <- c()
+```
+
+```{r}
+f1_rf <- treinaEAvalia("rf")
+```
+
+
+```{r}
+f1_svm <- treinaEAvalia("svmLinearWeights")
+```
+
+```{r}
+f1_logreg <- treinaEAvalia("LogitBoost")
+```
+
+```{r}
+f1_knn <- treinaEAvalia("kknn")
+```
+
+
+```{r}
+f1_nb <- treinaEAvalia("nb")
+```
+
+```{r}
+
+modelo <- train(classifica~., data=treino, method="rf", trControl=trainControl(method="cv", number=5), prox=TRUE, allowParallel=FALSE)
+varImp(modelo)
+```
+
+
+
+
